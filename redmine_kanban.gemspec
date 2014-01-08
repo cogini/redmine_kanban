@@ -40,8 +40,6 @@ Gem::Specification.new do |s|
      "app/views/kanbans/_user.html.erb",
      "app/views/kanbans/show.html.erb",
      "app/views/settings/_kanban_settings.html.erb",
-     "assets/javascripts/jquery-1.3.2.min.js",
-     "assets/javascripts/jquery-ui-1.7.2.custom.min.js",
      "assets/javascripts/jquery.json-1.3.min.js",
      "assets/javascripts/kanban.js",
      "assets/stylesheets/redmine_kanban.css",
