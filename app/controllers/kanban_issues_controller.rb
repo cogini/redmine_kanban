@@ -16,7 +16,7 @@ class KanbanIssuesController < ApplicationController
   helper :journals
   helper :issue_relations
   helper :timelog
-  
+
   def new
     @issue = Issue.new(:status => IssueStatus.default)
     @issue.author_login = User.current.login if @issue.respond_to?(:author_login)
@@ -24,9 +24,9 @@ class KanbanIssuesController < ApplicationController
     if @settings['panes'].present? && @settings['panes']['incoming'].present? && @settings['panes']['incoming']['excluded_projects'].present?
       valid_incoming_projects_conditions.add(["#{Project.table_name}.id IN (?)", @settings['panes']['incoming']['excluded_projects']])
     end
-                                                         
+
     @allowed_projects = User.current.projects.all(:conditions => valid_incoming_projects_conditions.conditions)
-                                                   
+
     @project = @allowed_projects.detect {|p| p.id.to_s == params[:issue][:project_id]} if params[:issue] && params[:issue][:project_id]
     @project ||= @allowed_projects.first
     @issue.project ||= @project
@@ -47,7 +47,7 @@ class KanbanIssuesController < ApplicationController
     #if ChiliProject::Compatibility.using_acts_as_journalized?
     #  @journals = @issue.journals.find(:all, :include => [:user], :order => "#{Journal.table_name}.created_at ASC")
     #else
-      @journals = @issue.journals.find(:all, :include => [:user, :details], :order => "#{Journal.table_name}.created_on ASC")
+      @journals = @issue.journals.find(:all, :include => :user, :order => "#{Journal.table_name}.created_at ASC")
     #end
     @journals.reverse! if User.current.wants_comments_in_reverse_order?
     @changesets = @issue.changesets.visible.all
@@ -62,7 +62,7 @@ class KanbanIssuesController < ApplicationController
       format.js {
         # Redmine only uses a single template so render that template to a
         # string first, then embed that string into our custom template. Meta!
-        @core_content = render_to_string(:layout => false, :template => 'issues/show.html.erb')
+        @core_content = render_to_string(:layout => false, :template => 'issues/show.rhtml')
         render :layout => false
       }
     end
@@ -73,10 +73,10 @@ class KanbanIssuesController < ApplicationController
     @allowed_statuses = @issue.new_statuses_allowed_to(User.current)
     @allowed_projects = Issue.allowed_target_projects_on_move
     @allowed_projects.reject! {|p| @settings['panes']['incoming']['excluded_projects'] && @settings['panes']['incoming']['excluded_projects'].include?(p.id.to_s) }
-    
+
     @priorities = IssuePriority.all
     @priorities.reject! {|p| @settings['panes']['incoming']['excluded_priorities'] && @settings['panes']['incoming']['excluded_priorities'].include?(p.id.to_s) }
-    
+
     respond_to do |format|
       format.html { render :text => '', :status => :not_acceptable }
       format.js { render :action => 'edit_incoming', :layout => false }
